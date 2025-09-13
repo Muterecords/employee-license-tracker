@@ -24,10 +24,7 @@ jobs:
       run: |
         if [ -f native-android.zip ]; then
           unzip native-android.zip
-          ls -la
-        else
-          echo "native-android.zip not found, checking directory contents:"
-          ls -la
+          ls -la native-android/
         fi
         
     - name: Set up JDK 17
@@ -36,15 +33,20 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
         
-    - name: Make gradlew executable
+    - name: Fix Gradle Wrapper
       run: |
         cd native-android
+        # Download gradle wrapper if missing
+        if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+          echo "Gradle wrapper missing, downloading..."
+          gradle wrapper --gradle-version=7.4.2
+        fi
         chmod +x ./gradlew
         
     - name: Build Debug APK
       run: |
         cd native-android
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
         
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
