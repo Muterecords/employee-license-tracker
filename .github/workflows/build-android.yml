@@ -20,18 +20,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Extract native-android folder
+      run: |
+        if [ -f native-android.zip ]; then
+          unzip native-android.zip
+          ls -la
+        else
+          echo "native-android.zip not found, checking directory contents:"
+          ls -la
+        fi
+        
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
-        cache: 'gradle'
-        
-    - name: Extract native-android folder
-      run: |
-        if [ -f native-android.zip ]; then
-          unzip native-android.zip
-        fi
         
     - name: Make gradlew executable
       run: |
