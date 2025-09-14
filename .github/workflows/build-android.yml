@@ -26,21 +26,27 @@ jobs:
           unzip native-android.zip
         fi
         
-    - name: Set up JDK 11 (More Compatible)
+    - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '11'
         
-    - name: Check Gradle wrapper version
+    - name: Install Gradle and regenerate wrapper
       run: |
         cd native-android
-        cat gradle/wrapper/gradle-wrapper.properties
+        # Download and install Gradle
+        wget https://services.gradle.org/distributions/gradle-7.4.2-bin.zip
+        unzip -q gradle-7.4.2-bin.zip
+        export PATH=$PATH:$(pwd)/gradle-7.4.2/bin
+        
+        # Regenerate wrapper with known working version
+        gradle-7.4.2/bin/gradle wrapper --gradle-version=7.4.2
+        chmod +x ./gradlew
         
     - name: Build Debug APK
       run: |
         cd native-android
-        chmod +x ./gradlew
         ./gradlew assembleDebug --stacktrace
         
     - name: Upload APK Artifact
