@@ -20,45 +20,31 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Debug ZIP contents
+    - name: Extract native-android folder
       run: |
-        echo "=== Files in repository ==="
-        ls -la
-        echo "=== Extracting ZIP ==="
         if [ -f native-android.zip ]; then
           unzip native-android.zip
-          echo "=== Files after extraction ==="
-          ls -la
-          echo "=== Looking for Android project files ==="
-          find . -name "gradlew" -type f
-          find . -name "build.gradle" -type f
-        else
-          echo "native-android.zip not found!"
         fi
         
-    - name: Set up JDK 17
+    - name: Set up JDK 11 (More Compatible)
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '17'
+        java-version: '11'
         
-    - name: Find and build Android project
+    - name: Check Gradle wrapper version
       run: |
-        # Find where the Android project actually is
-        ANDROID_DIR=$(find . -name "gradlew" -type f | head -1 | xargs dirname)
-        echo "Found Android project in: $ANDROID_DIR"
+        cd native-android
+        cat gradle/wrapper/gradle-wrapper.properties
         
-        if [ -n "$ANDROID_DIR" ]; then
-          cd "$ANDROID_DIR"
-          chmod +x ./gradlew
-          ./gradlew assembleDebug --stacktrace
-        else
-          echo "No Android project found!"
-          exit 1
-        fi
+    - name: Build Debug APK
+      run: |
+        cd native-android
+        chmod +x ./gradlew
+        ./gradlew assembleDebug --stacktrace
         
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        path: "**/app/build/outputs/apk/debug/*.apk"
+        path: native-android/app/build/outputs/apk/debug/*.apk
