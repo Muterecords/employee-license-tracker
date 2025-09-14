@@ -33,20 +33,17 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
         
-    - name: Fix Gradle Wrapper
+    - name: Install Gradle
       run: |
-        cd native-android
-        # Download gradle wrapper if missing
-        if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-          echo "Gradle wrapper missing, downloading..."
-          gradle wrapper --gradle-version=7.4.2
-        fi
-        chmod +x ./gradlew
+        wget https://services.gradle.org/distributions/gradle-7.4.2-bin.zip
+        unzip -q gradle-7.4.2-bin.zip
+        export PATH=$PATH:$(pwd)/gradle-7.4.2/bin
+        echo "$(pwd)/gradle-7.4.2/bin" >> $GITHUB_PATH
         
-    - name: Build Debug APK
+    - name: Build Debug APK with System Gradle
       run: |
         cd native-android
-        ./gradlew assembleDebug --stacktrace
+        gradle assembleDebug --stacktrace
         
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
